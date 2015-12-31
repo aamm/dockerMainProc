@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+function startSubprocess() {
+    echo "It works!" | nc -l 8080 &
+}
+
+function receiveSIGINT() {
+    echo "I refuse to die!"
+}
+
+source /dockerMainProc
+

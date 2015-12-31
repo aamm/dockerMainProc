@@ -1,0 +1,747 @@
+#!/usr/bin/env bash
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+# 
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ==============================================================================
+#
+# This script is a library to simplify writing startup scripts for Docker
+# containers. For more information on how to use this script please refer to the
+# GitHub page:
+#
+
+################################################################################
+#                                                                              #
+# Signal traps                                                                 #
+#                                                                              #
+# There is one function called receiveX for each kind of trap X.               #
+# You can (pre-)overwrite a function in order to create your own behavior for  #
+# a certain signal. For instance, if you want to prevent Control+C to          #
+# terminate the container, you should overwrite receiveSIGINT:                 #
+#                                                                              # 
+# function receiveSIGINT() {                                                   # 
+#     echo "I refuse to die!"                                                  # 
+# }                                                                            # 
+#                                                                              #
+################################################################################
+
+#
+# SIGHUP - 1
+#
+trap "receiveSIGHUP" SIGHUP
+! type -t receiveSIGHUP >/dev/null && function receiveSIGHUP() {
+    SIGNAL_CODE=1
+    SIGNAL_NAME="SIGHUP"
+    teardown
+}
+
+#
+# SIGINT - 2
+#
+trap "receiveSIGINT" SIGINT
+! type -t receiveSIGINT >/dev/null && function receiveSIGINT() {
+    SIGNAL_CODE=2
+    SIGNAL_NAME="SIGINT"
+    teardown
+}
+
+#
+# SIGQUIT - 3
+#
+trap "receiveSIGQUIT" SIGQUIT
+! type -t receiveSIGQUIT >/dev/null && function receiveSIGQUIT() {
+    SIGNAL_CODE=3
+    SIGNAL_NAME="SIGQUIT"
+    teardown
+}
+
+#
+# SIGILL - 4
+#
+trap "receiveSIGILL" SIGILL
+! type -t receiveSIGILL >/dev/null && function receiveSIGILL() {
+    SIGNAL_CODE=4
+    SIGNAL_NAME="SIGILL"
+    teardown
+}
+
+#
+# SIGTRAP - 5
+#
+trap "receiveSIGTRAP" SIGTRAP
+! type -t receiveSIGTRAP >/dev/null && function receiveSIGTRAP() {
+    SIGNAL_CODE=5
+    SIGNAL_NAME="SIGTRAP"
+    teardown
+}
+
+#
+# SIGABRT - 6
+#
+trap "receiveSIGABRT" SIGABRT
+! type -t receiveSIGABRT >/dev/null && function receiveSIGABRT() {
+    SIGNAL_CODE=6
+    SIGNAL_NAME="SIGABRT"
+    teardown
+}
+
+#
+# SIGBUS - 7
+#
+trap "receiveSIGBUS" SIGBUS
+! type -t receiveSIGBUS >/dev/null && function receiveSIGBUS() {
+    SIGNAL_CODE=7
+    SIGNAL_NAME="SIGBUS"
+    teardown
+}
+
+#
+# SIGFPE - 8
+#
+trap "receiveSIGFPE" SIGFPE
+! type -t receiveSIGFPE >/dev/null && function receiveSIGFPE() {
+    SIGNAL_CODE=8
+    SIGNAL_NAME="SIGFPE"
+    teardown
+}
+
+#
+# SIGKILL - 9
+#
+trap "receiveSIGKILL" SIGKILL
+! type -t receiveSIGKILL >/dev/null && function receiveSIGKILL() {
+    SIGNAL_CODE=9
+    SIGNAL_NAME="SIGKILL"
+    teardown
+}
+
+#
+# SIGUSR1 - 10
+#
+trap "receiveSIGUSR1" SIGUSR1
+! type -t receiveSIGUSR1 >/dev/null && function receiveSIGUSR1() {
+    SIGNAL_CODE=10
+    SIGNAL_NAME="SIGUSR1"
+    teardown
+}
+
+#
+# SIGSEGV - 11
+#
+trap "receiveSIGSEGV" SIGSEGV
+! type -t receiveSIGSEGV >/dev/null && function receiveSIGSEGV() {
+    SIGNAL_CODE=11
+    SIGNAL_NAME="SIGSEGV"
+    teardown
+}
+
+#
+# SIGUSR2 - 12
+#
+trap "receiveSIGUSR2" SIGUSR2
+! type -t receiveSIGUSR2 >/dev/null && function receiveSIGUSR2() {
+    SIGNAL_CODE=12
+    SIGNAL_NAME="SIGUSR2"
+    teardown
+}
+
+#
+# SIGPIPE - 13
+#
+trap "receiveSIGPIPE" SIGPIPE
+! type -t receiveSIGPIPE >/dev/null && function receiveSIGPIPE() {
+    SIGNAL_CODE=13
+    SIGNAL_NAME="SIGPIPE"
+    teardown
+}
+
+#
+# SIGALRM - 14
+#
+trap "receiveSIGALRM" SIGALRM
+! type -t receiveSIGALRM >/dev/null && function receiveSIGALRM() {
+    SIGNAL_CODE=14
+    SIGNAL_NAME="SIGALRM"
+    teardown
+}
+
+#
+# SIGTERM - 15
+#
+trap "receiveSIGTERM" SIGTERM
+! type -t receiveSIGTERM >/dev/null && function receiveSIGTERM() {
+    SIGNAL_CODE=15
+    SIGNAL_NAME="SIGTERM"
+    teardown
+}
+
+#
+# SIGSTKFLT - 16
+#
+trap "receiveSIGSTKFLT" SIGSTKFLT
+! type -t receiveSIGSTKFLT >/dev/null && function receiveSIGSTKFLT() {
+    SIGNAL_CODE=16
+    SIGNAL_NAME="SIGSTKFLT"
+    teardown
+}
+
+#
+# SIGCHLD - 17
+#
+trap "receiveSIGCHLD" SIGCHLD
+! type -t receiveSIGCHLD >/dev/null && function receiveSIGCHLD() {
+    SIGNAL_CODE=17
+    SIGNAL_NAME="SIGCHLD"
+    teardown
+}
+
+#
+# SIGCONT - 18
+#
+trap "receiveSIGCONT" SIGCONT
+! type -t receiveSIGCONT >/dev/null && function receiveSIGCONT() {
+    SIGNAL_CODE=18
+    SIGNAL_NAME="SIGCONT"
+    teardown
+}
+
+#
+# SIGSTOP - 19
+#
+trap "receiveSIGSTOP" SIGSTOP
+! type -t receiveSIGSTOP >/dev/null && function receiveSIGSTOP() {
+    SIGNAL_CODE=19
+    SIGNAL_NAME="SIGSTOP"
+    teardown
+}
+
+#
+# SIGTSTP - 20
+#
+trap "receiveSIGTSTP" SIGTSTP
+! type -t receiveSIGTSTP >/dev/null && function receiveSIGTSTP() {
+    SIGNAL_CODE=20
+    SIGNAL_NAME="SIGTSTP"
+    teardown
+}
+
+#
+# SIGTTIN - 21
+#
+trap "receiveSIGTTIN" SIGTTIN
+! type -t receiveSIGTTIN >/dev/null && function receiveSIGTTIN() {
+    SIGNAL_CODE=21
+    SIGNAL_NAME="SIGTTIN"
+    teardown
+}
+
+#
+# SIGTTOU - 22
+#
+trap "receiveSIGTTOU" SIGTTOU
+! type -t receiveSIGTTOU >/dev/null && function receiveSIGTTOU() {
+    SIGNAL_CODE=22
+    SIGNAL_NAME="SIGTTOU"
+    teardown
+}
+
+#
+# SIGURG - 23
+#
+trap "receiveSIGURG" SIGURG
+! type -t receiveSIGURG >/dev/null && function receiveSIGURG() {
+    SIGNAL_CODE=23
+    SIGNAL_NAME="SIGURG"
+    teardown
+}
+
+#
+# SIGXCPU - 24
+#
+trap "receiveSIGXCPU" SIGXCPU
+! type -t receiveSIGXCPU >/dev/null && function receiveSIGXCPU() {
+    SIGNAL_CODE=24
+    SIGNAL_NAME="SIGXCPU"
+    teardown
+}
+
+#
+# SIGXFSZ - 25
+#
+trap "receiveSIGXFSZ" SIGXFSZ
+! type -t receiveSIGXFSZ >/dev/null && function receiveSIGXFSZ() {
+    SIGNAL_CODE=25
+    SIGNAL_NAME="SIGXFSZ"
+    teardown
+}
+
+#
+# SIGVTALRM - 26
+#
+trap "receiveSIGVTALRM" SIGVTALRM
+! type -t receiveSIGVTALRM >/dev/null && function receiveSIGVTALRM() {
+    SIGNAL_CODE=26
+    SIGNAL_NAME="SIGVTALRM"
+    teardown
+}
+
+#
+# SIGPROF - 27
+#
+trap "receiveSIGPROF" SIGPROF
+! type -t receiveSIGPROF >/dev/null && function receiveSIGPROF() {
+    SIGNAL_CODE=27
+    SIGNAL_NAME="SIGPROF"
+    teardown
+}
+
+#
+# SIGWINCH - 28
+#
+trap "receiveSIGWINCH" SIGWINCH
+! type -t receiveSIGWINCH >/dev/null && function receiveSIGWINCH() {
+    SIGNAL_CODE=28
+    SIGNAL_NAME="SIGWINCH"
+    teardown
+}
+
+#
+# SIGIO - 29
+#
+trap "receiveSIGIO" SIGIO
+! type -t receiveSIGIO >/dev/null && function receiveSIGIO() {
+    SIGNAL_CODE=29
+    SIGNAL_NAME="SIGIO"
+    teardown
+}
+
+#
+# SIGPWR - 30
+#
+trap "receiveSIGPWR" SIGPWR
+! type -t receiveSIGPWR >/dev/null && function receiveSIGPWR() {
+    SIGNAL_CODE=30
+    SIGNAL_NAME="SIGPWR"
+    teardown
+}
+
+#
+# SIGSYS - 31
+#
+trap "receiveSIGSYS" SIGSYS
+! type -t receiveSIGSYS >/dev/null && function receiveSIGSYS() {
+    SIGNAL_CODE=31
+    SIGNAL_NAME="SIGSYS"
+    teardown
+}
+
+#
+# SIGRTMIN - 34
+#
+trap "receiveSIGRTMIN" SIGRTMIN
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN() {
+    SIGNAL_CODE=34
+    SIGNAL_NAME="SIGRTMIN"
+    teardown
+}
+
+#
+# SIGRTMIN+1 - 35
+#
+trap "receiveSIGRTMIN+1" SIGRTMIN+1
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+1() {
+    SIGNAL_CODE=35
+    SIGNAL_NAME="SIGRTMIN+1"
+    teardown
+}
+
+#
+# SIGRTMIN+2 - 36
+#
+trap "receiveSIGRTMIN+2" SIGRTMIN+2
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+2() {
+    SIGNAL_CODE=36
+    SIGNAL_NAME="SIGRTMIN+2"
+    teardown
+}
+
+#
+# SIGRTMIN+3 - 37
+#
+trap "receiveSIGRTMIN+3" SIGRTMIN+3
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+3() {
+    SIGNAL_CODE=37
+    SIGNAL_NAME="SIGRTMIN+3"
+    teardown
+}
+
+#
+# SIGRTMIN+4 - 38
+#
+trap "receiveSIGRTMIN+4" SIGRTMIN+4
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+4() {
+    SIGNAL_CODE=38
+    SIGNAL_NAME="SIGRTMIN+4"
+    teardown
+}
+
+#
+# SIGRTMIN+5 - 39
+#
+trap "receiveSIGRTMIN+5" SIGRTMIN+5
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+5() {
+    SIGNAL_CODE=39
+    SIGNAL_NAME="SIGRTMIN+5"
+    teardown
+}
+
+#
+# SIGRTMIN+6 - 40
+#
+trap "receiveSIGRTMIN+6" SIGRTMIN+6
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+6() {
+    SIGNAL_CODE=40
+    SIGNAL_NAME="SIGRTMIN+6"
+    teardown
+}
+
+#
+# SIGRTMIN+7 - 41
+#
+trap "receiveSIGRTMIN+7" SIGRTMIN+7
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+7() {
+    SIGNAL_CODE=41
+    SIGNAL_NAME="SIGRTMIN+7"
+    teardown
+}
+
+#
+# SIGRTMIN+8 - 42
+#
+trap "receiveSIGRTMIN+8" SIGRTMIN+8
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+8() {
+    SIGNAL_CODE=42
+    SIGNAL_NAME="SIGRTMIN+8"
+    teardown
+}
+
+#
+# SIGRTMIN+9 - 43
+#
+trap "receiveSIGRTMIN+9" SIGRTMIN+9
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+9() {
+    SIGNAL_CODE=43
+    SIGNAL_NAME="SIGRTMIN+9"
+    teardown
+}
+
+#
+# SIGRTMIN+10 - 44
+#
+trap "receiveSIGRTMIN+10" SIGRTMIN+10
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+10() {
+    SIGNAL_CODE=44
+    SIGNAL_NAME="SIGRTMIN+10"
+    teardown
+}
+
+#
+# SIGRTMIN+11 - 45
+#
+trap "receiveSIGRTMIN+11" SIGRTMIN+11
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+11() {
+    SIGNAL_CODE=45
+    SIGNAL_NAME="SIGRTMIN+11"
+    teardown
+}
+
+#
+# SIGRTMIN+12 - 46
+#
+trap "receiveSIGRTMIN+12" SIGRTMIN+12
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+12() {
+    SIGNAL_CODE=46
+    SIGNAL_NAME="SIGRTMIN+12"
+    teardown
+}
+
+#
+# SIGRTMIN+13 - 47
+#
+trap "receiveSIGRTMIN+13" SIGRTMIN+13
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+13() {
+    SIGNAL_CODE=47
+    SIGNAL_NAME="SIGRTMIN+13"
+    teardown
+}
+
+#
+# SIGRTMIN+14 - 48
+#
+trap "receiveSIGRTMIN+14" SIGRTMIN+14
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+14() {
+    SIGNAL_CODE=48
+    SIGNAL_NAME="SIGRTMIN+14"
+    teardown
+}
+
+#
+# SIGRTMIN+15 - 49
+#
+trap "receiveSIGRTMIN+15" SIGRTMIN+15
+! type -t receiveSIGRTMIN >/dev/null && function receiveSIGRTMIN+15() {
+    SIGNAL_CODE=49
+    SIGNAL_NAME="SIGRTMIN+15"
+    teardown
+}
+
+#
+# SIGRTMAX-14 - 50
+#
+trap "receiveSIGRTMAX-14" SIGRTMAX-14
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-14() {
+    SIGNAL_CODE=50
+    SIGNAL_NAME="SIGRTMAX-14"
+    teardown
+}
+
+#
+# SIGRTMAX-13 - 51
+#
+trap "receiveSIGRTMAX-13" SIGRTMAX-13
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-13() {
+    SIGNAL_CODE=51
+    SIGNAL_NAME="SIGRTMAX-13"
+    teardown
+}
+
+#
+# SIGRTMAX-12 - 52
+#
+trap "receiveSIGRTMAX-12" SIGRTMAX-12
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-12() {
+    SIGNAL_CODE=52
+    SIGNAL_NAME="SIGRTMAX-12"
+    teardown
+}
+
+#
+# SIGRTMAX-11 - 53
+#
+trap "receiveSIGRTMAX-11" SIGRTMAX-11
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-11() {
+    SIGNAL_CODE=53
+    SIGNAL_NAME="SIGRTMAX-11"
+    teardown
+}
+
+#
+# SIGRTMAX-10 - 54
+#
+trap "receiveSIGRTMAX-10" SIGRTMAX-10
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-10() {
+    SIGNAL_CODE=54
+    SIGNAL_NAME="SIGRTMAX-10"
+    teardown
+}
+
+#
+# SIGRTMAX-9 - 55
+#
+trap "receiveSIGRTMAX-9" SIGRTMAX-9
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-9() {
+    SIGNAL_CODE=55
+    SIGNAL_NAME="SIGRTMAX-9"
+    teardown
+}
+
+#
+# SIGRTMAX-8 - 56
+#
+trap "receiveSIGRTMAX-8" SIGRTMAX-8
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-8() {
+    SIGNAL_CODE=56
+    SIGNAL_NAME="SIGRTMAX-8"
+    teardown
+}
+
+#
+# SIGRTMAX-7 - 57
+#
+trap "receiveSIGRTMAX-7" SIGRTMAX-7
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-7() {
+    SIGNAL_CODE=57
+    SIGNAL_NAME="SIGRTMAX-7"
+    teardown
+}
+
+#
+# SIGRTMAX-6 - 58
+#
+trap "receiveSIGRTMAX-6" SIGRTMAX-6
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-6() {
+    SIGNAL_CODE=58
+    SIGNAL_NAME="SIGRTMAX-6"
+    teardown
+}
+
+#
+# SIGRTMAX-5 - 59
+#
+trap "receiveSIGRTMAX-5" SIGRTMAX-5
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-5() {
+    SIGNAL_CODE=59
+    SIGNAL_NAME="SIGRTMAX-5"
+    teardown
+}
+
+#
+# SIGRTMAX-4 - 60
+#
+trap "receiveSIGRTMAX-4" SIGRTMAX-4
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-4() {
+    SIGNAL_CODE=60
+    SIGNAL_NAME="SIGRTMAX-4"
+    teardown
+}
+
+#
+# SIGRTMAX-3 - 61
+#
+trap "receiveSIGRTMAX-3" SIGRTMAX-3
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-3() {
+    SIGNAL_CODE=61
+    SIGNAL_NAME="SIGRTMAX-3"
+    teardown
+}
+
+#
+# SIGRTMAX-2 - 62
+#
+trap "receiveSIGRTMAX-2" SIGRTMAX-2
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-2() {
+    SIGNAL_CODE=62
+    SIGNAL_NAME="SIGRTMAX-2"
+    teardown
+}
+
+#
+# SIGRTMAX-1 - 63
+#
+trap "receiveSIGRTMAX-1" SIGRTMAX-1
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX-1() {
+    SIGNAL_CODE=63
+    SIGNAL_NAME="SIGRTMAX-1"
+    teardown
+}
+
+#
+# SIGRTMAX - 64
+#
+trap "receiveSIGRTMAX" SIGRTMAX
+! type -t receiveSIGRTMAX >/dev/null && function receiveSIGRTMAX() {
+    SIGNAL_CODE=64
+    SIGNAL_NAME="SIGRTMAX"
+    teardown
+}
+
+################################################################################
+#                                                                              #
+# Callback functions                                                           #
+#                                                                              #
+# These are functions that can be overwritten in order to change this library  #
+# behavior to suit your needs.                                                 #
+#                                                                              #
+################################################################################
+
+#
+# This function is called to setup the child process. This function differs from
+# startSubprocess in that this one is in charge not only to start the sub
+# process but also to prepare for this script to monitor the subprocess.
+#
+# (Pre-)overwrite this function if you want to change the way the subprocess is
+# created and monitored.
+#
+# The default implementation of this function starts the subprocess and sets the
+# CHILD_PID variable with the subprocess PID. 
+#
+! type -t setupSubprocess >/dev/null && function setupSubprocess() {
+    startSubprocess
+    CHILD_PID=${!}
+}
+
+#
+# This function is in charge of starting the subprocess. It is important to
+# note that the background process that will be monitored should be the last
+# background process created by this function.
+#
+# This function is called by setupSubprocess. So if you (pre-)overwrote, it is
+# not necessary to overwrite this function.
+#
+! type -t startSubprocess >/dev/null && function startSubprocess() {
+    echo "TODO - Override this function." >&2
+}
+
+#
+# Checks if the subprocess is running.
+#
+# (Pre-)overwrite this function if you want to set your own way to check if it
+# is time to terminate the container.
+#
+! type -t checkSubprocess >/dev/null && function checkSubprocess() {
+    checkPid $CHILD_PID && return 0
+}
+
+#
+# This function is invoked when this script traps any of the kill signals.
+#
+# (Pre-)overwrite this function if you want to write your own procedure to
+# terminate the child process. For instance, if the child process is a database
+# server you may want to call a graceful database shutdown to avoid data
+# corruption.
+#
+! type -t teardown >/dev/null && function teardown() {
+    kill $CHILD_PID
+    EXIT_CODE=$SIGNAL_CODE
+}
+
+################################################################################
+#                                                                              #
+# Utility functions                                                            # #                                                                              #
+################################################################################
+
+#
+# Given a process ID, returns 0 if the process exists and 1 otherwise.
+#
+function checkPid() {
+    kill -0 $1 2>/dev/null >&2 && return 0
+    return 1
+}
+
+################################################################################
+#                                                                              #
+# The script itself                                                            # #                                                                              #
+################################################################################
+
+EXIT_CODE=0
+CHILD_PID=0
+
+setupSubprocess
+
+echo "Child PID: $CHILD_PID"
+
+while true; do
+    sleep 1
+    ! checkSubprocess && exit $EXIT_CODE
+done
+
