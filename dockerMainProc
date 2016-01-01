@@ -16,17 +16,18 @@
 #
 # This script is a library to simplify writing startup scripts for Docker
 # containers. For more information on how to use this script please refer to the
-# GitHub page:
+# GitHub page: https://github.com/aamm/dockerMainProc
 #
 
 ################################################################################
 #                                                                              #
 # Signal traps                                                                 #
 #                                                                              #
-# There is one function called receiveX for each kind of trap X.               #
+# For each kind of trap X there is one function called receiveX.               #
 # You can (pre-)overwrite a function in order to create your own behavior for  #
 # a certain signal. For instance, if you want to prevent Control+C to          #
-# terminate the container, you should overwrite receiveSIGINT:                 #
+# terminate the container, you should overwrite receiveSIGINT and do not call  #
+# the teardown function:                                                       #
 #                                                                              # 
 # function receiveSIGINT() {                                                   # 
 #     echo "I refuse to die!"                                                  # 
