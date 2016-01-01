@@ -18,7 +18,7 @@ It also allows for shell scripts to pre-overwrite some methods to extend its beh
 
 ## Getting started with the dockerMainProc lib
 
-Create your own shell script and source the dockerMainProc file. Let's say your script is called daemonScript:
+Create your own shell script and source the dockerMainProc file at the **end of your script**. Let's say your script is called daemonScript:
 
 ```shell
 #!/usr/bin/env bash
