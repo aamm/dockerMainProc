@@ -72,7 +72,7 @@ Removing intermediate container 9c4b7652ef72
 Successfully built 0b124eb994fb
 ```
 
-Next we create a container form this image:
+Next we create a container from this image:
 
 ```shell
 user@host$ docker run -d --name test -p 8080:8080 test
