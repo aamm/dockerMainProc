@@ -715,6 +715,16 @@ trap "receiveSIGRTMAX" SIGRTMAX
     EXIT_CODE=$SIGNAL_CODE
 }
 
+#
+# This function is invoked right before the main process script terminates.
+#
+# (Pre-)overwrite this function if you want to do some cleanup or if you simply
+# want to print a goodbye message.
+#
+! type -t beforeExit >/dev/null && function beforeExit() {
+    : # No op.
+}
+
 ################################################################################
 #                                                                              #
 # Utility functions                                                            #
@@ -744,6 +754,6 @@ echo "Child PID: $CHILD_PID"
 
 while true; do
     sleep 1
-    ! checkSubprocess && exit $EXIT_CODE
+    ! checkSubprocess && beforeExit && exit $EXIT_CODE
 done
 
