@@ -754,6 +754,8 @@ echo "Child PID: $CHILD_PID"
 
 while true; do
     sleep 1
-    ! checkSubprocess && beforeExit && exit $EXIT_CODE
+    if ! checkSubprocess; then
+        beforeExit
+        exit $EXIT_CODE
+    fi
 done
-
