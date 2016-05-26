@@ -677,7 +677,7 @@ trap "receiveSIGRTMAX" SIGRTMAX
 #
 ! type -t setupSubprocess >/dev/null && function setupSubprocess() {
     startSubprocess
-    CHILD_PID=${!}
+    [ "${CHILD_PID}" == "0" ] && CHILD_PID=${!}
 }
 
 #
