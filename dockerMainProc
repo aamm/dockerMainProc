@@ -685,8 +685,12 @@ trap "receiveSIGRTMAX" SIGRTMAX
 # note that the background process that will be monitored should be the last
 # background process created by this function.
 #
-# This function is called by setupSubprocess. So if you (pre-)overwrote, it is
-# not necessary to overwrite this function.
+# This function is called by setupSubprocess. So if you (pre-)overwrote
+# setupSubprocess, it is not necessary to (pre-)overwrite this function.
+#
+# You can also assign any arbitrary PID to be the one that will be monitored.
+# In order to do so, you only need to set the CHILD_PID variable to contain the
+# PID that should be monitored.
 #
 ! type -t startSubprocess >/dev/null && function startSubprocess() {
     echo "TODO - Override this function." >&2
