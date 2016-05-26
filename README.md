@@ -150,6 +150,24 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 As you can see. Now the container refuses all SIGINT signals. SIGINT is the signal that the operarting system sends to a process when the user presses Control+C. So ignoring SIGINT is useful to prevent users from destroying the container in a interactive session (for instance, using "docker run -it").
 
+## Pre-conditions
+
+It is also possible to use this library to make your container wait until an arbitrary pre-condition is met before the main process of your container actually starts. In order to use this feature you need to pre-override the `checkPreCondition` function. For example, you can do the following to wait for a remote MySQL database to start responding on port 3306:
+
+```shell
+function checkPreCondition() {
+    nc -zv mysql-host 3306 && return 0;
+    return 1
+}
+```
+
+There are two variables that control the behavior of the loop that waits for the pre-condition: TIMEOUT and INTERVAL:
+
+1. TIMEOUT is the time in seconds until the polling loop waits until the condition is met. If the timeout is reached, the script terminates without starting the main process.
+2. INTERVAL is the time in seconds between each pre-condition verification.
+
+You can simply set the value of these variables before the line in which you call `source /dockerMainProc`. 
+
 ## Other extension mechanisms
 
 It is possible to change the default behavior by pre-overwriting the functions bellow. For more information, please refer to the source code.

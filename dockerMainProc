@@ -729,6 +729,21 @@ trap "receiveSIGRTMAX" SIGRTMAX
     : # No op.
 }
 
+#
+# Checks a pre-condition for this container to start. This function should
+# return 0 (zero) when the pre-condition is met and anything different from 0
+# when the condition is not met.
+#
+# For instance, you may want to (pre-)overriding this function if your
+# container needs to wait for another container to provide some sort of service
+# before starting. An example is a web application container waiting for a
+# database container to be ready before starting up.
+#
+! type -t checkPreCondition >/dev/null && function checkPreCondition() {
+    return 0;
+}
+
+
 ################################################################################
 #                                                                              #
 # Utility functions                                                            #
@@ -748,6 +763,20 @@ function checkPid() {
 # The script itself                                                            #
 #                                                                              #
 ################################################################################
+
+# The timeout for this script to wait until the pre-condition is met before 
+[ -z ${TIMEOUT+a} ] && TIMEOUT=60
+
+# The interval between each verification
+[ -z ${INTERVAL+a} ] && INTERVAL=1
+
+PRE_OK=false
+while [ "$TIMEOUT" != "0" ] ; do
+    checkPreCondition && PRE_OK=true && break
+    sleep $INTERVAL
+    [ "$TIMEOUT" != "-1" ] && TIMEOUT=$(expr TIMEOUT - 1)
+done
+! $PRE_OK && echo "Pre-condition not met before timeout." && exit 1
 
 EXIT_CODE=0
 CHILD_PID=0
