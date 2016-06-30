@@ -10,6 +10,22 @@ But such execution model is not suitable for some server programs. For instance,
 
 A more convenient solution is to use a front shell script to spawn a server process in the background. Such shell script should be the entrypoint and only die when the background process dies.
 
+## What about exec?
+
+A common good practice is to use the `exec` command to start a new executable without fork, which preserves the PID 1. For instance, one may a Dockerfile setting the following shell script as the entry point:
+
+```shell
+#!/usr/bin/env bash
+
+# Some preparation...
+
+exec someOtherExecutable
+```
+
+This will start `someOtherExecutable` and the PID of this executable will be 1. Only when `someOtherExecutable` dies, the container will die.
+
+This approach can be used in a number of scenarios. But there are some cases in which you need something more sophisticated. For instance, you may have more than one server process and no single process should be the one that keeps the container alive. Also, you may use a script that creates the server process.
+
 ## Advantages of using dockerMainProc
 
 The dockerMainProc library provides most of the common functions that an entrypoint shell script needs such as signal trapping and subprocess monitoring.
